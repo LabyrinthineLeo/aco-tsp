@@ -13,12 +13,12 @@ class SolveTSPUsingACO:
 
     class Ant:
         def __init__(self, alpha, beta, num_nodes, edges):
-            self.alpha = alpha
-            self.beta = beta
-            self.num_nodes = num_nodes
-            self.edges = edges
-            self.tour = None
-            self.distance = 0.0
+            self.alpha = alpha  # 控制信息素浓度
+            self.beta = beta  # 控制启发式信息
+            self.num_nodes = num_nodes  # 节点数量
+            self.edges = edges  # 节点信息矩阵
+            self.tour = None  # 路径
+            self.distance = 0.0  # 距离
 
         def _select_node(self):
             roulette_wheel = 0.0
@@ -51,25 +51,40 @@ class SolveTSPUsingACO:
 
     def __init__(self, mode='ACS', colony_size=10, elitist_weight=1.0, min_scaling_factor=0.001, alpha=1.0, beta=3.0,
                  rho=0.1, pheromone_deposit_weight=1.0, initial_pheromone=1.0, steps=100, nodes=None, labels=None):
+        # ACO模式
         self.mode = mode
+        # 蚁群数量
         self.colony_size = colony_size
+        # 精英权重
         self.elitist_weight = elitist_weight
+        # 最小尺度因子
         self.min_scaling_factor = min_scaling_factor
         self.rho = rho
+        # 信息素释放权重
         self.pheromone_deposit_weight = pheromone_deposit_weight
+        # steps
         self.steps = steps
+        # 节点数量
         self.num_nodes = len(nodes)
+        # 节点信息
         self.nodes = nodes
+
+        # 节点索引
         if labels is not None:
             self.labels = labels
         else:
             self.labels = range(1, self.num_nodes + 1)
+
+        # 城市关联矩阵
         self.edges = [[None] * self.num_nodes for _ in range(self.num_nodes)]
+        # 构建边信息类，包含物理距离和信息素
         for i in range(self.num_nodes):
             for j in range(i + 1, self.num_nodes):
                 self.edges[i][j] = self.edges[j][i] = self.Edge(i, j, math.sqrt(
                     pow(self.nodes[i][0] - self.nodes[j][0], 2.0) + pow(self.nodes[i][1] - self.nodes[j][1], 2.0)),
                                                                 initial_pheromone)
+
+        # 构建蚁群
         self.ants = [self.Ant(alpha, beta, self.num_nodes, self.edges) for _ in range(self.colony_size)]
         self.global_best_tour = None
         self.global_best_distance = float("inf")
@@ -81,11 +96,13 @@ class SolveTSPUsingACO:
 
     def _acs(self):
         for step in range(self.steps):
+            # 遍历所有个体
             for ant in self.ants:
                 self._add_pheromone(ant.find_tour(), ant.get_distance())
                 if ant.distance < self.global_best_distance:
                     self.global_best_tour = ant.tour
                     self.global_best_distance = ant.distance
+            #
             for i in range(self.num_nodes):
                 for j in range(i + 1, self.num_nodes):
                     self.edges[i][j].pheromone *= (1.0 - self.rho)
@@ -153,22 +170,32 @@ class SolveTSPUsingACO:
             plt.annotate(self.labels[i], self.nodes[i], size=annotation_size)
         if save:
             if name is None:
-                name = '{0}.png'.format(self.mode)
+                name = './tour_plots/{0}.png'.format(self.mode)
             plt.savefig(name, dpi=dpi)
         plt.show()
         plt.gcf().clear()
 
 
 if __name__ == '__main__':
+    # 蚁群数量
     _colony_size = 5
     _steps = 50
-    _nodes = [(random.uniform(-400, 400), random.uniform(-400, 400)) for _ in range(0, 15)]
+    _nodes = [(random.uniform(0, 200), random.uniform(0, 200)) for _ in range(0, 15)]
+    print(_nodes)
+
+    # 经典ACO
     acs = SolveTSPUsingACO(mode='ACS', colony_size=_colony_size, steps=_steps, nodes=_nodes)
     acs.run()
     acs.plot()
+
+    xxx
+
+    # 精英ACO
     elitist = SolveTSPUsingACO(mode='Elitist', colony_size=_colony_size, steps=_steps, nodes=_nodes)
     elitist.run()
     elitist.plot()
+
+    # MaxMinACO
     max_min = SolveTSPUsingACO(mode='MaxMin', colony_size=_colony_size, steps=_steps, nodes=_nodes)
     max_min.run()
     max_min.plot()
