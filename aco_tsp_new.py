@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*- 
+# @Time : 2024/10/30 16:20 
+# @Author : Leo Yu 
+# @File : aco_tsp_new.py
+# @Desc : Implementing the ACO algorithms including the AS, the ACS, the Min_Max AS, and the Elitist AS.
+
 import math
 import random
 from matplotlib import pyplot as plt
@@ -204,3 +210,6 @@ if __name__ == '__main__':
     max_min = SolveTSPUsingACO(mode='MaxMin', colony_size=_colony_size, steps=_steps, nodes=_nodes)
     max_min.run()
     max_min.plot()
+
+
+
