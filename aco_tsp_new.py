@@ -4,6 +4,11 @@
 # @File : aco_tsp_new.py
 # @Desc : Implementing the ACO algorithms including the AS, the ACS, the Min_Max AS, and the Elitist AS.
 
+# ===========================================================================
+# Reference to Dorigo M, Birattari M, Stutzle T. Ant colony optimization[J].
+# IEEE computational intelligence magazine, 2006, 1(4): 28-39.
+# ===========================================================================
+
 import math
 import random
 from matplotlib import pyplot as plt
@@ -105,6 +110,13 @@ class SolveTSPUsingACO:
         pheromone_to_add = self.pheromone_deposit_weight / distance
         for i in range(self.num_nodes):
             self.edges[tour[i]][tour[(i + 1) % self.num_nodes]].pheromone += weight * pheromone_to_add
+
+    def _as(self):
+        for step in range(self.steps):
+            for ant in self.ants:
+                xxx
+
+
 
     def _acs(self):
         for step in range(self.steps):
