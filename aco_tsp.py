@@ -148,6 +148,7 @@ class SolveTSPUsingACO:
         for step in range(self.steps):
             iteration_best_tour = None
             iteration_best_distance = float("inf")
+
             for ant in self.ants:
                 ant.find_tour()
                 if ant.get_distance() < iteration_best_distance:
