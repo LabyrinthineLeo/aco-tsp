@@ -110,9 +110,9 @@ class SolveTSPUsingACO:
 
         for step in range(self.steps):
             # 更新全局信息素
-            # for i in range(self.num_nodes):
-            #     for j in range(i + 1, self.num_nodes):
-            #         self.edges[i][j].pheromone *= (1.0 - self.rho)
+            for i in range(self.num_nodes):
+                for j in range(i + 1, self.num_nodes):
+                    self.edges[i][j].pheromone *= (1.0 - self.rho)
 
             # 遍历所有个体
             for ant in self.ants:
@@ -124,20 +124,30 @@ class SolveTSPUsingACO:
                     self.global_best_distance = ant.distance
 
             # 更新全局信息素
-            for i in range(self.num_nodes):
-                for j in range(i + 1, self.num_nodes):
-                    self.edges[i][j].pheromone *= (1.0 - self.rho)
+            # for i in range(self.num_nodes):
+            #     for j in range(i + 1, self.num_nodes):
+            #         self.edges[i][j].pheromone *= (1.0 - self.rho)
 
             self.distance_list.append(self.global_best_distance)
 
     def _elitist(self):
+
         for step in range(self.steps):
+
+            # 先挥发
+            # for i in range(self.num_nodes):
+            #     for j in range(i + 1, self.num_nodes):
+            #         self.edges[i][j].pheromone *= (1.0 - self.rho)
+
             for ant in self.ants:
                 self._add_pheromone(ant.find_tour(), ant.get_distance())
                 if ant.distance < self.global_best_distance:
                     self.global_best_tour = ant.tour
                     self.global_best_distance = ant.distance
+
+            # 对最佳路径（精英蚂蚁）进一步增加信息素
             self._add_pheromone(self.global_best_tour, self.global_best_distance, weight=self.elitist_weight)
+
             for i in range(self.num_nodes):
                 for j in range(i + 1, self.num_nodes):
                     self.edges[i][j].pheromone *= (1.0 - self.rho)
@@ -146,14 +156,24 @@ class SolveTSPUsingACO:
 
     def _max_min(self):
         for step in range(self.steps):
+            # 局部最优，每代的结果
             iteration_best_tour = None
             iteration_best_distance = float("inf")
 
             for ant in self.ants:
+                # 解的构建
                 ant.find_tour()
+                # 更新局部最优
                 if ant.get_distance() < iteration_best_distance:
                     iteration_best_tour = ant.tour
                     iteration_best_distance = ant.distance
+
+            # 信息素挥发
+            # for i in range(self.num_nodes):
+            #     for j in range(i + 1, self.num_nodes):
+            #         self.edges[i][j].pheromone *= (1.0 - self.rho)
+
+            # 按照蚁群进化进度来确定更新全局最佳路径还是局部最佳路径
             if float(step + 1) / float(self.steps) <= 0.75:
                 self._add_pheromone(iteration_best_tour, iteration_best_distance)
                 max_pheromone = self.pheromone_deposit_weight / iteration_best_distance
@@ -163,14 +183,17 @@ class SolveTSPUsingACO:
                     self.global_best_distance = iteration_best_distance
                 self._add_pheromone(self.global_best_tour, self.global_best_distance)
                 max_pheromone = self.pheromone_deposit_weight / self.global_best_distance
+
             min_pheromone = max_pheromone * self.min_scaling_factor
+
             for i in range(self.num_nodes):
                 for j in range(i + 1, self.num_nodes):
-                    self.edges[i][j].pheromone *= (1.0 - self.rho)
+                    self.edges[i][j].pheromone *= (1.0 - self.rho)  # 其实是先累加再挥发
                     if self.edges[i][j].pheromone > max_pheromone:
                         self.edges[i][j].pheromone = max_pheromone
                     elif self.edges[i][j].pheromone < min_pheromone:
                         self.edges[i][j].pheromone = min_pheromone
+
             self.distance_list.append(self.global_best_distance)
 
     def run(self):
@@ -220,7 +243,7 @@ class SolveTSPUsingACO:
 if __name__ == '__main__':
     # 蚁群数量
     _colony_size = 5
-    _steps = 100
+    _steps = 200
     random.seed(10)
     _nodes = [(random.uniform(0, 200), random.uniform(0, 200)) for _ in range(0, 50)]
     print(_nodes)
